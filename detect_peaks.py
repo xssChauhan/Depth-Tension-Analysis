@@ -46,8 +46,8 @@ def detect_peaks(x, mph=None, mpd=1, threshold=0, edge='rising',
     -----
     The detection of valleys instead of peaks is performed internally by simply
     negating the data: `ind_valleys = detect_peaks(-x)`
-    
-    The function can handle NaN's 
+
+    The function can handle NaN's
 
     See this IPython Notebook [1]_.
 
@@ -145,7 +145,7 @@ def detect_peaks(x, mph=None, mpd=1, threshold=0, edge='rising',
     return ind
 
 
-def _plot(x, mph, mpd, threshold, edge, valley, ax, ind):
+def _plot(x, y , f , max_speed ,  max_tension ,mph, mpd, threshold, edge, valley, ax, ind):
     """Plot results of the detect_peaks function, see its help."""
     try:
         import matplotlib.pyplot as plt
@@ -156,20 +156,24 @@ def _plot(x, mph, mpd, threshold, edge, valley, ax, ind):
             _, ax = plt.subplots(1, 1, figsize=(8, 4))
 
         ax.plot(x, 'b', lw=1)
+        ax.plot(y , 'g' , lw = 1)
         if ind.size:
             label = 'valley' if valley else 'peak'
             label = label + 's' if ind.size > 1 else label
             ax.plot(ind, x[ind], '+', mfc=None, mec='r', mew=2, ms=8,
-                    label='%d %s' % (ind.size, label))
+                    label = '%d %s' % (ind.size, label))
+            ax.plot(max_speed[0] , max_speed[1], 'X')
             ax.legend(loc='best', framealpha=.5, numpoints=1)
+            ax.annotate("Max Speed %s"%(max_speed[1]) , xy = max_speed)
+            ax.annotate("Max Tension %s"%(max_tension[1]) , xy = max_tension)
         ax.set_xlim(-.02*x.size, x.size*1.02-1)
         ymin, ymax = x[np.isfinite(x)].min(), x[np.isfinite(x)].max()
         yrange = ymax - ymin if ymax > ymin else 1
-        ax.set_ylim(ymin - 0.1*yrange, ymax + 0.1*yrange)
+        ax.set_ylim(ymin - 0.1*yrange, max(max(y) ,ymax)+100)
         ax.set_xlabel('Data #', fontsize=14)
         ax.set_ylabel('Amplitude', fontsize=14)
         mode = 'Valley detection' if valley else 'Peak detection'
         ax.set_title("%s (mph=%s, mpd=%d, threshold=%s, edge='%s')"
                      % (mode, str(mph), mpd, str(threshold), edge))
         # plt.grid()
-        plt.show()
+        plt.savefig("image/%s"%f)
